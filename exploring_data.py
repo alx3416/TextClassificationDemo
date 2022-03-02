@@ -14,6 +14,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.layers import SpatialDropout1D, LSTM, Dense, Embedding, Bidirectional
 from keras.callbacks import EarlyStopping
 from keras import Sequential, Model, Input
+from keras.callbacks import ModelCheckpoint
 # for reporting
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -103,16 +104,21 @@ class_weights = class_weight.compute_class_weight(class_weight='balanced', class
 # Embed each integer in a 128-dimensional vector
 model = Sequential()
 model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=inputData.shape[1]))
-model.add(SpatialDropout1D(0.2))
-model.add(Bidirectional(LSTM(100, dropout=0.2, recurrent_dropout=0.2, return_sequences=True)))
-model.add(Bidirectional(LSTM(100, dropout=0.2, recurrent_dropout=0.2)))
+model.add(SpatialDropout1D(0.25))
+model.add(LSTM(25, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
+model.add(LSTM(25, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(12, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 print(model.summary())
 
-epochs = 2
+filepath = "tmp/weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+
+epochs = 7
 batch_size = 1024
-history = model.fit(inputData, outputLabels, epochs=epochs, batch_size=batch_size, validation_split=0.15, class_weight=class_weights)
+history = model.fit(inputData, outputLabels, epochs=epochs, batch_size=batch_size, validation_split=0.15,
+                    class_weight=class_weights,
+                    callbacks=[checkpoint, EarlyStopping(monitor='val_loss', patience=3, min_delta=0.0001)])
 
 # Reporting and quality metrics
 #score = model.evaluate(inputData, outputLabels, verbose=1)
