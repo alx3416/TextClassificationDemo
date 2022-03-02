@@ -29,12 +29,12 @@ productTypes = trainData[productColumnName].value_counts()
 for row in range(9):
     print(trainData.loc[row].at[consumerMessageColumnName])
 
-plt.bar(productTypes.index, productTypes.values)
-plt.xticks(rotation='vertical')
-plt.title('Dataset classes')
-plt.tight_layout()
-plt.savefig('plots/dataset_classes.png')
-plt.show()
+#plt.bar(productTypes.index, productTypes.values)
+#plt.xticks(rotation='vertical')
+#plt.title('Dataset classes')
+#plt.tight_layout()
+#plt.savefig('plots/dataset_classes.png')
+#plt.show()
 
 # preprocessing consumer mesages
 df = trainData.reset_index(drop=True)
@@ -66,11 +66,11 @@ for row in range(9):
 
 # LSTM Modelling
 # The maximum number of words to be used. (most frequent)
-MAX_NB_WORDS = 250
+MAX_NB_WORDS = 50000
 # Max number of words in each complaint.
-MAX_SEQUENCE_LENGTH = 50
+MAX_SEQUENCE_LENGTH = 250
 # This is fixed.
-EMBEDDING_DIM = 30
+EMBEDDING_DIM = 100
 
 tokenizer = Tokenizer(num_words=MAX_NB_WORDS, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True)
 tokenizer.fit_on_texts(trainData[consumerMessageColumnName].values)
@@ -102,25 +102,24 @@ class_weights = class_weight.compute_class_weight(class_weight='balanced', class
 
 # Embed each integer in a 128-dimensional vector
 model = Sequential()
-model.add(Embedding(input_dim=MAX_NB_WORDS, output_dim=EMBEDDING_DIM, input_length=MAX_SEQUENCE_LENGTH))
-# Add 2 bidirectional LSTMs
-model.add(Bidirectional(LSTM(6, dropout=0.4, recurrent_dropout=0.4, return_sequences=True)))
-model.add(Bidirectional(LSTM(6, dropout=0.4, recurrent_dropout=0.4)))
-# Add a classifier
-model.add(Dense(12, activation="sigmoid"))
-model.summary()
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
+model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=inputData.shape[1]))
+model.add(SpatialDropout1D(0.2))
+model.add(Bidirectional(LSTM(100, dropout=0.2, recurrent_dropout=0.2, return_sequences=True)))
+model.add(Bidirectional(LSTM(100, dropout=0.2, recurrent_dropout=0.2)))
+model.add(Dense(12, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+print(model.summary())
 
-epochs = 3
-batch_size = 4096
-history = model.fit(inputData, categorical_labels, epochs=epochs, batch_size=batch_size, validation_split=0.15, class_weight=class_weights)
+epochs = 2
+batch_size = 1024
+history = model.fit(inputData, outputLabels, epochs=epochs, batch_size=batch_size, validation_split=0.15, class_weight=class_weights)
 
 # Reporting and quality metrics
-score = model.evaluate(inputData, outputLabels, verbose=1)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+#score = model.evaluate(inputData, outputLabels, verbose=1)
+#print('Test loss:', score[0])
+#print('Test accuracy:', score[1])
 
-y_pred = model.predict(inputData)
+y_pred = model.predict(inputData, verbose=1, batch_size=batch_size)
 y_pred = np.argmax(y_pred, axis=1)
 y_test = outputArray
 target_names = list(productTypes.index)
