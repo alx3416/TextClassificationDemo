@@ -44,8 +44,8 @@ if __name__ == '__main__':
     dataTest.tokenizeData()
     dataTest.paddingData()
     classesTest, scoresTest, scoresFullTest = NLPClassifier.classifyData(dataTest.inputData, con.batchSize)
-    rep.generatePredictionTestCSV(dataTest, classes, dataContainer.productTypes.index)
-    rep.generateScoreTestCSV(dataTest, scoresFull)
+    rep.generatePredictionTestCSV(dataTest, classesTest, dataContainer.productTypes.index)
+    rep.generateScoreTestCSV(dataTest, scoresFullTest)
 
 
 

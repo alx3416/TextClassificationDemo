@@ -3,6 +3,7 @@
 CSV_DATA_TRAIN_PATH = "data/customer-issues-train.csv"
 CSV_DATA_TEST_PATH = "data/customer-issues-train.csv"
 PRODUCT_INDEX = 1
+
 CONSUMER_MESSAGE_INDEX_TRAIN = 5
 CONSUMER_MESSAGE_INDEX_TEST = 1
 

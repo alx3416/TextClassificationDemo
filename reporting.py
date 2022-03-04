@@ -69,7 +69,6 @@ def generatePredictionTestCSV(dataTest, classes, classesNames):
 
 def generateScoreTestCSV(dataTest, scoresFull):
     testResults = dataTest.originalData[['complaint-id']]
-    target = []
     for col in range(scoresFull.shape[1]):
         testResults[str(col)] = scoresFull[:, col].tolist()
     testResults.to_csv('output/scores_test.csv')
