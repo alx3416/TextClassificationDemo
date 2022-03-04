@@ -10,11 +10,12 @@ import config_parameters as con
 
 
 class TextData:
-    def __init__(self, csvFile):
+    def __init__(self, csvFile, CONSUMER_MESSAGE_INDEX):
         self.trainData = pd.read_csv(csvFile)
+        self.originalData = self.trainData
         self.listColumnNames = list(self.trainData.columns)
         self.productColumnName = self.listColumnNames[con.PRODUCT_INDEX]
-        self.consumerMessageColumnName = self.listColumnNames[con.CONSUMER_MESSAGE_INDEX]
+        self.consumerMessageColumnName = self.listColumnNames[CONSUMER_MESSAGE_INDEX]
         self.productTypes = self.trainData[self.productColumnName].value_counts()
         self.tokenizer = None
         self.inputData = None

@@ -6,7 +6,7 @@ import config_parameters as con
 
 if __name__ == '__main__':
     # Read and preprocess data
-    dataContainer = pre.TextData("data/customer-issues-train.csv")
+    dataContainer = pre.TextData("data/customer-issues-train.csv", con.CONSUMER_MESSAGE_INDEX_TRAIN)
     rep.barPlotClassesAndSave(dataContainer.productTypes)
     dataContainer.cleanData()
     dataContainer.tokenizeData()
@@ -27,7 +27,7 @@ if __name__ == '__main__':
                                   con.batchSize, classWeights)
 
     # Get quality metrics and scores
-    classes, scores = NLPClassifier.classifyData(dataContainer.inputData, con.batchSize)
+    classes, scores, scoresFull = NLPClassifier.classifyData(dataContainer.inputData, con.batchSize)
     rep.showConfusionMatrix(classes, outputLabelsValues)
     rep.showClassificationReport(classes, outputLabelsValues, list(dataContainer.productTypes.index))
 
@@ -38,4 +38,16 @@ if __name__ == '__main__':
         rep.saveHistory(NLPClassifier.history)
         rep.plotAccuracyHistory(NLPClassifier.history)
         rep.plotLossHistory(NLPClassifier.history)
+
+    dataTest = pre.TextData("data/customer-issues-test.csv", con.CONSUMER_MESSAGE_INDEX_TEST)
+    dataTest.cleanData()
+    dataTest.tokenizeData()
+    dataTest.paddingData()
+    classesTest, scoresTest, scoresFullTest = NLPClassifier.classifyData(dataTest.inputData, con.batchSize)
+    rep.generatePredictionTestCSV(dataTest, classes, dataContainer.productTypes.index)
+    rep.generateScoreTestCSV(dataTest, scoresFull)
+
+
+
+
 

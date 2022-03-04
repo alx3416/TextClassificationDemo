@@ -14,8 +14,8 @@ class TextClassifier:
             self.model = Sequential()
             self.model.add(Embedding(con.MAX_NB_WORDS, con.EMBEDDING_DIM, input_length=shape))
             self.model.add(SpatialDropout1D(0.25))
-            self.model.add(LSTM(1, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
-            self.model.add(LSTM(1, dropout=0.2, recurrent_dropout=0.2))
+            self.model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
+            self.model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
             self.model.add(Dense(12, activation='softmax'))
             self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
             self.isPreTrained = False
@@ -51,7 +51,7 @@ class TextClassifier:
         scoresArray = self.model.predict(inputData, verbose=1, batch_size=batchSize)
         predictedClass = np.argmax(scoresArray, axis=1)
         predictedScore = np.max(scoresArray, axis=1)
-        return predictedClass, predictedScore
+        return predictedClass, predictedScore, scoresArray
 
     def saveModel(self, path):
         self.model.save(path)

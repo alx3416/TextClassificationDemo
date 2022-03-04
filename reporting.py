@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import classification_report, confusion_matrix
+import numpy as np
 
 
 def barPlotClassesAndSave(productTypes):
@@ -55,3 +56,20 @@ def saveHistory(history):
     hist_csv_file = 'output/history.csv'
     with open(hist_csv_file, mode='w') as f:
         hist_df.to_csv(f)
+
+
+def generatePredictionTestCSV(dataTest, classes, classesNames):
+    testResults = dataTest.originalData[['consumer-message']]
+    target = []
+    for row in classes:
+        target.append(classesNames[classes[row]])
+    testResults["prediccion"] = target
+    testResults.to_csv('output/predicciones_test.csv')
+
+
+def generateScoreTestCSV(dataTest, scoresFull):
+    testResults = dataTest.originalData[['complaint-id']]
+    target = []
+    for col in range(scoresFull.shape[1]):
+        testResults[str(col)] = scoresFull[:, col].tolist()
+    testResults.to_csv('output/scores_test.csv')
