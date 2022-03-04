@@ -10,5 +10,5 @@ MAX_SEQUENCE_LENGTH = 250
 EMBEDDING_DIM = 100
 
 # NLP model train params
-epochs = 1
+epochs = 2
 batchSize = 1024

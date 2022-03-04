@@ -1,6 +1,6 @@
-from keras.layers import SpatialDropout1D, LSTM, Dense, Embedding, Bidirectional
+from keras.layers import SpatialDropout1D, LSTM, Dense, Embedding
 from keras.callbacks import EarlyStopping
-from keras import Sequential, Model, Input
+from keras import Sequential, models
 from keras.callbacks import ModelCheckpoint
 import numpy as np
 import config_parameters as con
@@ -10,13 +10,18 @@ class TextClassifier:
     def __init__(self, shape):
         self.checkpoint = None
         self.history = None
-        self.model = Sequential()
-        self.model.add(Embedding(con.MAX_NB_WORDS, con.EMBEDDING_DIM, input_length=shape))
-        self.model.add(SpatialDropout1D(0.25))
-        self.model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
-        self.model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
-        self.model.add(Dense(12, activation='softmax'))
-        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        if shape != 0:
+            self.model = Sequential()
+            self.model.add(Embedding(con.MAX_NB_WORDS, con.EMBEDDING_DIM, input_length=shape))
+            self.model.add(SpatialDropout1D(0.25))
+            self.model.add(LSTM(1, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
+            self.model.add(LSTM(1, dropout=0.2, recurrent_dropout=0.2))
+            self.model.add(Dense(12, activation='softmax'))
+            self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+            self.isPreTrained = False
+        else:
+            self.model = models.load_model('output/LSTM_propuesta.h5')
+            self.isPreTrained = True
 
     def showSummary(self):
         print(self.model.summary())
@@ -27,17 +32,20 @@ class TextClassifier:
                                           save_best_only=True, mode='max')
 
     def trainClassifier(self, inputData, outputLabels, epochs, batchSize, class_weights):
-        if self.checkpoint is None:
-            self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
-                                          validation_split=0.15,
-                                          class_weight=class_weights,
-                                          callbacks=[EarlyStopping(monitor='val_loss', patience=3, min_delta=0.0001)])
-        else:
-            self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
-                                          validation_split=0.15,
-                                          class_weight=class_weights,
-                                          callbacks=[self.checkpoint,
-                                                     EarlyStopping(monitor='val_loss', patience=3, min_delta=0.0001)])
+        if self.isPreTrained is False:
+            if self.checkpoint is None:
+                self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
+                                              validation_split=0.15,
+                                              class_weight=class_weights,
+                                              callbacks=[EarlyStopping(monitor='val_loss', patience=3,
+                                                                       min_delta=0.0001)])
+            else:
+                self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
+                                              validation_split=0.15,
+                                              class_weight=class_weights,
+                                              callbacks=[self.checkpoint,
+                                                         EarlyStopping(monitor='val_loss', patience=3,
+                                                                       min_delta=0.0001)])
 
     def classifyData(self, inputData, batchSize):
         scoresArray = self.model.predict(inputData, verbose=1, batch_size=batchSize)

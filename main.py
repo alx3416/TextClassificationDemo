@@ -4,7 +4,7 @@ import classifier as cla
 import config_parameters as con
 
 
-def main():
+if __name__ == '__main__':
     # Read and preprocess data
     dataContainer = pre.TextData("data/customer-issues-train.csv")
     rep.barPlotClassesAndSave(dataContainer.productTypes)
@@ -16,7 +16,11 @@ def main():
     classWeights = dataContainer.getClassWeights()
 
     # Train and evaluate model
-    NLPClassifier = cla.TextClassifier(dataContainer.inputData.shape[1])
+    # Define inputSize = 0 to load pretrained model
+    # inputSize = dataContainer.inputData.shape[1]
+    inputSize = 0
+
+    NLPClassifier = cla.TextClassifier(inputSize)
     NLPClassifier.showSummary()
     NLPClassifier.activateSaveCheckpoints()
     NLPClassifier.trainClassifier(dataContainer.inputData, outputLabels, con.epochs,
@@ -29,4 +33,9 @@ def main():
 
     # Saving figures and data
     NLPClassifier.saveModel('output/my_model.h5')
-    rep.saveHistory(NLPClassifier.history)
+    rep.saveClassificationReport(classes, outputLabelsValues, list(dataContainer.productTypes.index))
+    if NLPClassifier.isPreTrained is False:
+        rep.saveHistory(NLPClassifier.history)
+        rep.plotAccuracyHistory(NLPClassifier.history)
+        rep.plotLossHistory(NLPClassifier.history)
+
