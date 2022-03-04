@@ -30,12 +30,12 @@ productTypes = trainData[productColumnName].value_counts()
 for row in range(9):
     print(trainData.loc[row].at[consumerMessageColumnName])
 
-#plt.bar(productTypes.index, productTypes.values)
-#plt.xticks(rotation='vertical')
-#plt.title('Dataset classes')
-#plt.tight_layout()
-#plt.savefig('plots/dataset_classes.png')
-#plt.show()
+plt.bar(productTypes.index, productTypes.values)
+plt.xticks(rotation='vertical')
+plt.title('Dataset classes')
+plt.tight_layout()
+plt.savefig('plots/dataset_classes.png')
+plt.show()
 
 # preprocessing consumer mesages
 df = trainData.reset_index(drop=True)
@@ -99,22 +99,23 @@ def getLabelsArray(outputLabels):
 outputArray = getLabelsArray(outputLabels)
 # categorical KERAS
 categorical_labels = to_categorical(outputArray, num_classes=12)
-class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(outputArray), y=outputArray)
+# class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(outputArray), y=outputArray)
+class_weights = np.sum(productTypes.values)/(12*productTypes.values)
 
 # Embed each integer in a 128-dimensional vector
 model = Sequential()
 model.add(Embedding(MAX_NB_WORDS, EMBEDDING_DIM, input_length=inputData.shape[1]))
 model.add(SpatialDropout1D(0.25))
-model.add(LSTM(25, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
-model.add(LSTM(25, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
+model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(12, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 print(model.summary())
 
-filepath = "tmp/weights-improvement-{epoch:02d}-{val_accuracy:.2f}.hdf5"
+filepath = "tmp/weights-improvement-{epoch:02d}-{accuracy:.2f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 
-epochs = 7
+epochs = 10
 batch_size = 1024
 history = model.fit(inputData, outputLabels, epochs=epochs, batch_size=batch_size, validation_split=0.15,
                     class_weight=class_weights,
@@ -136,9 +137,9 @@ print('Classification Report')
 print(classification_report(y_test, y_pred, target_names=target_names))
 
 # saving
-model.save('output/RNN_Bidirectional_balanced.h5')
+model.save('output/RNN_Bidirectional_balancedManualfull.h5')
 hist_df = pd.DataFrame(history.history)
-hist_csv_file = 'output/history.csv'
+hist_csv_file = 'output/history_balancedManualfull.csv'
 with open(hist_csv_file, mode='w') as f:
     hist_df.to_csv(f)
 
