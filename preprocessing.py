@@ -1,39 +1,63 @@
-# multi-class classification with Keras
-import pandas
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasClassifier
-from keras.utils import np_utils
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import Pipeline
-
-# load dataset
-dataframe = pandas.read_csv("data/iris.data", header=None)
-dataset = dataframe.values
-X = dataset[:, 0:4].astype(float)
-Y = dataset[:, 4]
-# encode class values as integers
-encoder = LabelEncoder()
-encoder.fit(Y)
-encoded_Y = encoder.transform(Y)
-# convert integers to dummy variables (i.e. one hot encoded)
-dummy_y = np_utils.to_categorical(encoded_Y)
+import pandas as pd
+import re
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+import numpy as np
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+import config_parameters as con
 
 
-# define baseline model
-def baseline_model():
-    # create model
-    model = Sequential()
-    model.add(Dense(8, input_dim=4, activation='relu'))
-    model.add(Dense(3, activation='softmax'))
-    # Compile model
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return model
+class TextData:
+    def __init__(self, csvFile):
+        self.trainData = pd.read_csv(csvFile)
+        self.listColumnNames = list(self.trainData.columns)
+        self.productColumnName = self.listColumnNames[con.PRODUCT_INDEX]
+        self.consumerMessageColumnName = self.listColumnNames[con.CONSUMER_MESSAGE_INDEX]
+        self.productTypes = self.trainData[self.productColumnName].value_counts()
+        self.tokenizer = None
+        self.inputData = None
+        self.outputLabels = None
+        self.outputLabelsValues = None
+        self.classWeights = None
 
+    def cleanData(self):
+        self.trainData = self.trainData.reset_index(drop=True)
+        REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
+        BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
+        STOPWORDS = set(stopwords.words('english'))
 
-estimator = KerasClassifier(build_fn=baseline_model, epochs=200, batch_size=5, verbose=0)
-kfold = KFold(n_splits=10, shuffle=True)
-results = cross_val_score(estimator, X, dummy_y, cv=kfold)
-print("Baseline: %.2f%% (%.2f%%)" % (results.mean() * 100, results.std() * 100))
+        def cleanText(text):
+            text = text.lower()  # lowercase text
+            text = REPLACE_BY_SPACE_RE.sub(' ', text)
+            text = BAD_SYMBOLS_RE.sub('', text)
+            text = text.replace('x', '')
+            #    text = re.sub(r'\W+', '', text)
+            text = ' '.join(word for word in text.split() if word not in STOPWORDS)  # remove stopwors from text
+            return text
+
+        self.trainData[self.consumerMessageColumnName] = self.trainData[self.consumerMessageColumnName].apply(cleanText)
+        self.trainData[self.consumerMessageColumnName] = self.trainData[self.consumerMessageColumnName].str.replace('\d+', '')
+
+    def tokenizeData(self):
+        self.tokenizer = Tokenizer(num_words=con.MAX_NB_WORDS, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True)
+        self.tokenizer.fit_on_texts(self.trainData[self.consumerMessageColumnName].values)
+
+    def paddingData(self):
+        self.inputData = self.tokenizer.texts_to_sequences(self.trainData[self.consumerMessageColumnName].values)
+        self.inputData = pad_sequences(self.inputData, maxlen=con.MAX_SEQUENCE_LENGTH)
+
+    def getOutputLabels(self):
+        self.outputLabels = pd.get_dummies(self.trainData[self.productColumnName]).values
+        return self.outputLabels
+
+    def getClassWeights(self):
+        self.classWeights = np.sum(self.productTypes.values) / (len(self.productTypes) * self.productTypes.values)
+        return self.classWeights
+
+    def getLabelsArray(self):
+        self.outputLabelsValues = np.zeros(self.outputLabels.shape[0])
+        for row in range(self.outputLabels.shape[0]):
+            self.outputLabelsValues[row] = np.argmax(self.outputLabels[row])
+        return self.outputLabelsValues
