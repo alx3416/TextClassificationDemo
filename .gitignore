@@ -10,3 +10,5 @@
 /data
 /output
 /tmp
+/plots
+/__pycache__

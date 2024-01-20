@@ -59,7 +59,7 @@ def saveHistory(history):
 
 
 def generatePredictionTestCSV(dataTest, classes, classesNames):
-    testResults = dataTest.originalData[['consumer-message']]
+    testResults = dataTest.trainData[['review_body']]
     target = []
     for row in classes:
         target.append(classesNames[classes[row]])
@@ -68,7 +68,7 @@ def generatePredictionTestCSV(dataTest, classes, classesNames):
 
 
 def generateScoreTestCSV(dataTest, scoresFull):
-    testResults = dataTest.originalData[['complaint-id']]
+    testResults = dataTest.originalData[['review_id']]
     for col in range(scoresFull.shape[1]):
         testResults[str(col)] = scoresFull[:, col].tolist()
     testResults.to_csv('output/scores_test.csv')

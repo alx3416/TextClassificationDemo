@@ -16,12 +16,16 @@ class TextData:
         self.listColumnNames = list(self.trainData.columns)
         self.productColumnName = self.listColumnNames[con.PRODUCT_INDEX]
         self.consumerMessageColumnName = self.listColumnNames[CONSUMER_MESSAGE_INDEX]
+        self.languageMessageColumnName = self.listColumnNames[con.LANGUAGE_INDEX]
         self.productTypes = self.trainData[self.productColumnName].value_counts()
         self.tokenizer = None
         self.inputData = None
         self.outputLabels = None
         self.outputLabelsValues = None
         self.classWeights = None
+
+    def filterLanguage(self):
+        self.trainData = self.originalData[self.originalData[self.languageMessageColumnName] == con.LANGUAGE_SELECTED]
 
     def cleanData(self):
         self.trainData = self.trainData.reset_index(drop=True)

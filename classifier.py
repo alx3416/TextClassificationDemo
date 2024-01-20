@@ -16,7 +16,7 @@ class TextClassifier:
             self.model.add(SpatialDropout1D(0.25))
             self.model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
             self.model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
-            self.model.add(Dense(12, activation='softmax'))
+            self.model.add(Dense(5, activation='softmax'))
             self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
             self.isPreTrained = False
         else:
@@ -31,18 +31,16 @@ class TextClassifier:
         self.checkpoint = ModelCheckpoint(checkpoints_filepath, monitor='val_accuracy', verbose=1,
                                           save_best_only=True, mode='max')
 
-    def trainClassifier(self, inputData, outputLabels, epochs, batchSize, class_weights):
+    def trainClassifier(self, inputData, outputLabels, epochs, batchSize):
         if self.isPreTrained is False:
             if self.checkpoint is None:
                 self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
                                               validation_split=0.15,
-                                              class_weight=class_weights,
                                               callbacks=[EarlyStopping(monitor='val_loss', patience=3,
                                                                        min_delta=0.0001)])
             else:
                 self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
                                               validation_split=0.15,
-                                              class_weight=class_weights,
                                               callbacks=[self.checkpoint,
                                                          EarlyStopping(monitor='val_loss', patience=3,
                                                                        min_delta=0.0001)])

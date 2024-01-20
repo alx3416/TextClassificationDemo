@@ -6,30 +6,30 @@ import config_parameters as con
 
 if __name__ == '__main__':
     # Read and preprocess data
-    dataContainer = pre.TextData("data/customer-issues-train.csv", con.CONSUMER_MESSAGE_INDEX_TRAIN)
+    dataContainer = pre.TextData("data/train.csv", con.CONSUMER_MESSAGE_INDEX_TRAIN)
+    dataContainer.filterLanguage()
     rep.barPlotClassesAndSave(dataContainer.productTypes)
     dataContainer.cleanData()
     dataContainer.tokenizeData()
     dataContainer.paddingData()
     outputLabels = dataContainer.getOutputLabels()
     outputLabelsValues = dataContainer.getLabelsArray()
-    classWeights = dataContainer.getClassWeights()
 
     # Train and evaluate model
     # Define inputSize = 0 to load pretrained model
-    # inputSize = dataContainer.inputData.shape[1]
-    inputSize = 0
+    inputSize = dataContainer.inputData.shape[1]
+    # inputSize = 0
 
     NLPClassifier = cla.TextClassifier(inputSize)
     NLPClassifier.showSummary()
     NLPClassifier.activateSaveCheckpoints()
     NLPClassifier.trainClassifier(dataContainer.inputData, outputLabels, con.epochs,
-                                  con.batchSize, classWeights)
+                                  con.batchSize)
 
     # Get quality metrics and scores
     classes, scores, scoresFull = NLPClassifier.classifyData(dataContainer.inputData, con.batchSize)
     rep.showConfusionMatrix(classes, outputLabelsValues)
-    rep.showClassificationReport(classes, outputLabelsValues, list(dataContainer.productTypes.index))
+    rep.showClassificationReport(classes, outputLabelsValues, list(map(str, (dataContainer.productTypes.index))))
 
     # Saving figures and data
     NLPClassifier.saveModel('output/my_model.h5')
@@ -39,13 +39,14 @@ if __name__ == '__main__':
         rep.plotAccuracyHistory(NLPClassifier.history)
         rep.plotLossHistory(NLPClassifier.history)
 
-    dataTest = pre.TextData("data/customer-issues-test.csv", con.CONSUMER_MESSAGE_INDEX_TEST)
+    dataTest = pre.TextData("data/test.csv", con.CONSUMER_MESSAGE_INDEX_TEST)
+    dataTest.filterLanguage()
     dataTest.cleanData()
     dataTest.tokenizeData()
     dataTest.paddingData()
     classesTest, scoresTest, scoresFullTest = NLPClassifier.classifyData(dataTest.inputData, con.batchSize)
-    rep.generatePredictionTestCSV(dataTest, classesTest, dataContainer.productTypes.index)
-    rep.generateScoreTestCSV(dataTest, scoresFullTest)
+    # rep.generatePredictionTestCSV(dataTest, classesTest, dataContainer.productTypes.index)
+    # rep.generateScoreTestCSV(dataTest, scoresFullTest)
 
 
 
