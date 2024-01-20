@@ -23,7 +23,7 @@ if __name__ == '__main__':
     NLPClassifier = cla.TextClassifier(inputSize)
     NLPClassifier.showSummary()
     NLPClassifier.activateSaveCheckpoints()
-    NLPClassifier.trainClassifier(dataContainer.inputData, outputLabels, con.epochs,
+    NLPClassifier.trainClassifier(dataContainer.inputData, outputLabelsValues/4.0, con.epochs,
                                   con.batchSize)
 
     # Get quality metrics and scores

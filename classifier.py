@@ -14,25 +14,26 @@ class TextClassifier:
             self.model = Sequential()
             self.model.add(Embedding(con.MAX_NB_WORDS, con.EMBEDDING_DIM, input_length=shape))
             self.model.add(SpatialDropout1D(0.25))
-            self.model.add(Conv1D(26, 5, activation='relu'))
+            self.model.add(Conv1D(52, 9, activation='relu'))
             self.model.add(MaxPooling1D(pool_size=2, padding='valid'))
-            self.model.add(Conv1D(13, 5, activation='relu'))
+            self.model.add(SpatialDropout1D(0.25))
+            self.model.add(Conv1D(26, 9, activation='relu'))
             self.model.add(MaxPooling1D(pool_size=2, padding='valid'))
             self.model.add(Flatten())
-            self.model.add(Dense(5, activation='softmax'))
-            self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+            self.model.add(Dense(1, activation='relu'))
+            self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
             self.isPreTrained = False
         else:
-            self.model = models.load_model('output/LSTM_propuesta.h5')
+            self.model = models.load_model('output/regression_propuesta.h5')
             self.isPreTrained = True
 
     def showSummary(self):
         print(self.model.summary())
 
     def activateSaveCheckpoints(self):
-        checkpoints_filepath = "tmp/weights-improvement-{epoch:02d}-{accuracy:.2f}.hdf5"
-        self.checkpoint = ModelCheckpoint(checkpoints_filepath, monitor='val_accuracy', verbose=1,
-                                          save_best_only=True, mode='max')
+        checkpoints_filepath = "tmp/weights-improvement-{epoch:02d}-{loss:.2f}.hdf5"
+        self.checkpoint = ModelCheckpoint(checkpoints_filepath, monitor='val_loss', verbose=1,
+                                          save_best_only=True, mode='min')
 
     def trainClassifier(self, inputData, outputLabels, epochs, batchSize):
         if self.isPreTrained is False:
