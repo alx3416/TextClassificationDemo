@@ -16,11 +16,11 @@ class TextClassifier:
             self.model.add(SpatialDropout1D(0.25))
             self.model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
             self.model.add(LSTM(50, dropout=0.2, recurrent_dropout=0.2))
-            self.model.add(Dense(1, activation='relu'))
+            self.model.add(Dense(1, activation='sigmoid'))
             self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
             self.isPreTrained = False
         else:
-            self.model = models.load_model('output/regression_propuesta.h5')
+            self.model = models.load_model('output/regression_propuesta_2.h5')
             self.isPreTrained = True
 
     def showSummary(self):
@@ -57,7 +57,7 @@ class TextClassifier:
 
 class NLPClassifier:
     def __init__(self):
-        self.model = saving.load_model('output/my_model.h5')
+        self.model = saving.load_model('output/my_model_regression.h5')
 
     def classifyData(self, inputData):
         return self.model.predict(inputData, verbose=1)
