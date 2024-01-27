@@ -1,4 +1,6 @@
+import sys
 import pandas as pd
+import importlib
 import re
 import nltk
 nltk.download('stopwords')
@@ -7,6 +9,8 @@ import numpy as np
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import config_parameters as con
+import ecal.core.core as ecal_core
+from ecal.core.subscriber import ProtoSubscriber
 
 
 class TextData:
@@ -66,3 +70,47 @@ class TextData:
         for row in range(self.outputLabels.shape[0]):
             self.outputLabelsValues[row] = np.argmax(self.outputLabels[row])
         return self.outputLabelsValues
+
+class MessageData(TextData):
+    def __init__(self, messageName):
+        self.messageName = messageName
+        self.processName = "Protobuff_Message"
+        self.start()
+        self.messageWasReceived = False
+        self.messageWasActivated = False
+        self.subscriber = None
+        self.ret = int()
+        self.message = self.startSubscriber(self.messageName)()
+
+    def __del__(self):
+        self.subscriber.c_subscriber.destroy()
+        return
+
+    @staticmethod
+    def getProto(topicName):
+        Proto = importlib.import_module("messages." + topicName + "_pb2")
+        return eval("Proto." + topicName)
+
+    def startSubscriber(self, topicName):
+        ProtoPb = self.getProto(topicName)
+        self.subscriber = ProtoSubscriber(topicName, ProtoPb)
+        self.messageWasReceived = False
+        self.messageWasActivated = False
+        return ProtoPb
+
+    def start(self):
+        ecal_core.initialize(sys.argv, self.processName)
+        ecal_core.set_process_state(1, 1, "")
+
+    def receive(self, waitTime):
+        self.ret, self.message, timeStamp = self.subscriber.receive(waitTime)
+        if self.ret != 0:
+            self.messageWasReceived = True
+
+    def waitForMessage(self, waitTime):
+        self.messageWasReceived = False
+        self.receive(waitTime)
+        return self.messageWasReceived
+
+    def getTimeStamp(self):
+        return self.message.header.timestamp
