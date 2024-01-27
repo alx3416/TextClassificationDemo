@@ -26,27 +26,11 @@ if __name__ == '__main__':
     NLPClassifier.trainClassifier(dataContainer.inputData, outputLabelsValues/4.0, con.epochs,
                                   con.batchSize)
 
-    # Get quality metrics and scores
-    classes, scores, scoresFull = NLPClassifier.classifyData(dataContainer.inputData, con.batchSize)
-    rep.showConfusionMatrix(classes, outputLabelsValues)
-    rep.showClassificationReport(classes, outputLabelsValues, list(map(str, (dataContainer.productTypes.index))))
+
 
     # Saving figures and data
-    NLPClassifier.saveModel('output/my_model.h5')
-    rep.saveClassificationReport(classes, outputLabelsValues, list(dataContainer.productTypes.index))
-    if NLPClassifier.isPreTrained is False:
-        rep.saveHistory(NLPClassifier.history)
-        rep.plotAccuracyHistory(NLPClassifier.history)
-        rep.plotLossHistory(NLPClassifier.history)
+    NLPClassifier.saveModel('output/my_model_regression.h5')
 
-    dataTest = pre.TextData("data/test.csv", con.CONSUMER_MESSAGE_INDEX_TEST)
-    dataTest.filterLanguage()
-    dataTest.cleanData()
-    dataTest.tokenizeData()
-    dataTest.paddingData()
-    classesTest, scoresTest, scoresFullTest = NLPClassifier.classifyData(dataTest.inputData, con.batchSize)
-    # rep.generatePredictionTestCSV(dataTest, classesTest, dataContainer.productTypes.index)
-    # rep.generateScoreTestCSV(dataTest, scoresFullTest)
 
 
 

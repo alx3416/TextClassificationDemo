@@ -10,4 +10,4 @@ while messageData.getProtobuffStatus():
         print("Predicting comment rating...")
         messageData.paddingData()
         x = model.classifyData(messageData.inputData)
-        print(x)
+        print(x*5)

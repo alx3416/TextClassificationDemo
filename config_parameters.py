@@ -17,9 +17,9 @@ CONSUMER_MESSAGE_INDEX_TEST = 5  # input
 
 # Word2Vec params
 MAX_NB_WORDS = 50000
-MAX_SEQUENCE_LENGTH = 150
-EMBEDDING_DIM = 50
+MAX_SEQUENCE_LENGTH = 100
+EMBEDDING_DIM = 100
 
 # NLP model train params
-epochs = 40
-batchSize = 512
+epochs = 10
+batchSize = 128
