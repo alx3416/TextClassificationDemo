@@ -1,4 +1,4 @@
-from keras.layers import SpatialDropout1D, LSTM, Dense, Embedding, Conv1D, MaxPooling1D, Flatten
+from keras.layers import SpatialDropout1D, LSTM, Dense, Embedding, Conv1D, MaxPooling1D, Flatten, BatchNormalization
 from keras.callbacks import EarlyStopping
 from keras import Sequential, models
 from keras.callbacks import ModelCheckpoint
@@ -14,12 +14,8 @@ class TextClassifier:
             self.model = Sequential()
             self.model.add(Embedding(con.MAX_NB_WORDS, con.EMBEDDING_DIM, input_length=shape))
             self.model.add(SpatialDropout1D(0.25))
-            self.model.add(Conv1D(52, 9, activation='relu'))
-            self.model.add(MaxPooling1D(pool_size=2, padding='valid'))
-            self.model.add(SpatialDropout1D(0.25))
-            self.model.add(Conv1D(26, 9, activation='relu'))
-            self.model.add(MaxPooling1D(pool_size=2, padding='valid'))
-            self.model.add(Flatten())
+            self.model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
+            self.model.add(LSTM(50, dropout=0.2, recurrent_dropout=0.2))
             self.model.add(Dense(1, activation='relu'))
             self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
             self.isPreTrained = False
