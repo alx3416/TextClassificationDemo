@@ -1,10 +1,13 @@
 import preprocessing as pre
-import reporting as rep
 import classifier as cla
-import config_parameters as con
 
-
+model = cla.NLPClassifier()
 messageData = pre.MessageData("mi_mensaje")
+messageData.tokenizeData()
 while messageData.getProtobuffStatus():
     if messageData.waitForMessage(50):
         print(messageData.getComment())
+        print("Predicting comment rating...")
+        messageData.paddingData()
+        x = model.classifyData(messageData.inputData)
+        print(x)

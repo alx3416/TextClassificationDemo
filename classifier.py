@@ -1,6 +1,6 @@
 from keras.layers import SpatialDropout1D, LSTM, Dense, Embedding, Conv1D, MaxPooling1D, Flatten, BatchNormalization
 from keras.callbacks import EarlyStopping
-from keras import Sequential, models
+from keras import Sequential, models, saving
 from keras.callbacks import ModelCheckpoint
 import numpy as np
 import config_parameters as con
@@ -53,3 +53,11 @@ class TextClassifier:
 
     def saveModel(self, path):
         self.model.save(path)
+
+
+class NLPClassifier:
+    def __init__(self):
+        self.model = saving.load_model('output/my_model.h5')
+
+    def classifyData(self, inputData):
+        return self.model.predict(inputData, verbose=1)

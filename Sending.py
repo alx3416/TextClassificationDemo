@@ -12,7 +12,7 @@ protobuf_message = mi_mensaje_pb2.mi_mensaje()
 counter = 0
 
 while ecal_core.ok():
-    protobuf_message.comment = "Good product, better than expected"
+    protobuf_message.comment = "Awful worst product in my life"
     protobuf_message.id = 123456
     protobuf_message.date = 321654987
     pub.send(protobuf_message)

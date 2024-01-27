@@ -82,6 +82,8 @@ class MessageData(TextData):
         self.subscriber = None
         self.ret = int()
         self.message = self.startSubscriber(self.messageName)()
+        self.tokenizer = None
+        self.inputData = None
 
     def __del__(self):
         self.subscriber.c_subscriber.destroy()
@@ -125,3 +127,14 @@ class MessageData(TextData):
 
     def getDate(self):
         return self.message.date
+
+    def tokenizeData(self):
+        self.tokenizer = Tokenizer(num_words=con.MAX_NB_WORDS, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True)
+        trainData = pd.read_csv('data/train.csv')
+        listColumnNames = list(trainData.columns)
+        consumerMessageColumnName = listColumnNames[con.CONSUMER_MESSAGE_INDEX_TRAIN]
+        self.tokenizer.fit_on_texts(trainData[consumerMessageColumnName].values)
+
+    def paddingData(self):
+        self.inputData = self.tokenizer.texts_to_sequences([self.getComment()])
+        self.inputData = pad_sequences(self.inputData, maxlen=con.MAX_SEQUENCE_LENGTH)
