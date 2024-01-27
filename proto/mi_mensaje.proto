@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package pb;
+
+message mi_mensaje
+{
+  string comment   = 1;
+  int32 id         = 2;
+  int32 date       = 3;
+}

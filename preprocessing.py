@@ -71,10 +71,11 @@ class TextData:
             self.outputLabelsValues[row] = np.argmax(self.outputLabels[row])
         return self.outputLabelsValues
 
+
 class MessageData(TextData):
     def __init__(self, messageName):
         self.messageName = messageName
-        self.processName = "Protobuff_Message"
+        self.processName = "Python Protobuf Subscriber"
         self.start()
         self.messageWasReceived = False
         self.messageWasActivated = False
@@ -88,7 +89,7 @@ class MessageData(TextData):
 
     @staticmethod
     def getProto(topicName):
-        Proto = importlib.import_module("messages." + topicName + "_pb2")
+        Proto = importlib.import_module("proto." + topicName + "_pb2")
         return eval("Proto." + topicName)
 
     def startSubscriber(self, topicName):
@@ -112,5 +113,15 @@ class MessageData(TextData):
         self.receive(waitTime)
         return self.messageWasReceived
 
-    def getTimeStamp(self):
-        return self.message.header.timestamp
+    @staticmethod
+    def getProtobuffStatus():
+        return ecal_core.ok()
+
+    def getComment(self):
+        return self.message.comment
+
+    def getId(self):
+        return self.message.id
+
+    def getDate(self):
+        return self.message.date
