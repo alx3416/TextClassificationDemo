@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
 
     # Saving figures and data
-    NLPClassifier.saveModel('output/my_model_regression.h5')
+    NLPClassifier.saveModel('output/my_model_regression_crossentropy_last.h5')
 
 
 

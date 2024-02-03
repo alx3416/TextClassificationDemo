@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        #myHeader {
+            background-color: orange;
+            color: black;
+            padding: 40px;
+            text-align: center;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Zorros Negros ITQ</title>
+    <link rel="icon" type="image/x-icon" href="../static/images/tecnm.jpg">
+</head>
+<body>
+<h1 id="myHeader">A simple webpage to test a keras model</h1>
+<p>EQUPO ZORROS NEGROS</p>
+<p>Objetivo: Via Javascript, enviar JSON con comentario a una webapp con Flask, la webapp recibe el comentario,
+lo procesa via tokenizer y paddingData para después aplicar un modelo de regresión e idnetificar cuantas estrellas
+le corresponden al comentario</p>
+<img src="../static/images/zorros.jpg" width="230" height="230">
+<br>
+<label for="comment">My comment:</label> <input type="text" id="comment" name="comment">
+<button type="button" onclick="myFunction()">Try me!</button>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script src="../static/myCode.js"></script>
+</body>
+</html>

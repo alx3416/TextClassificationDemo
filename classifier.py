@@ -13,9 +13,11 @@ class TextClassifier:
         if shape != 0:
             self.model = Sequential()
             self.model.add(Embedding(con.MAX_NB_WORDS, con.EMBEDDING_DIM, input_length=shape))
-            self.model.add(SpatialDropout1D(0.25))
-            self.model.add(LSTM(100, dropout=0.25, recurrent_dropout=0.25, return_sequences=True))
-            self.model.add(LSTM(50, dropout=0.2, recurrent_dropout=0.2))
+            self.model.add(SpatialDropout1D(0.15))
+            self.model.add(LSTM(150, dropout=0.15, recurrent_dropout=0.15, return_sequences=True))
+            self.model.add(LSTM(100, dropout=0.15, recurrent_dropout=0.15))
+            self.model.add(Dense(25, activation='relu'))
+            self.model.add(Dense(10, activation='relu'))
             self.model.add(Dense(1, activation='sigmoid'))
             self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mean_squared_error'])
             self.isPreTrained = False
@@ -36,13 +38,13 @@ class TextClassifier:
             if self.checkpoint is None:
                 self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
                                               validation_split=0.15,
-                                              callbacks=[EarlyStopping(monitor='val_loss', patience=3,
+                                              callbacks=[EarlyStopping(monitor='val_loss', patience=5,
                                                                        min_delta=0.0001)])
             else:
                 self.history = self.model.fit(inputData, outputLabels, epochs=epochs, batch_size=batchSize,
                                               validation_split=0.15,
                                               callbacks=[self.checkpoint,
-                                                         EarlyStopping(monitor='val_loss', patience=3,
+                                                         EarlyStopping(monitor='val_loss', patience=5,
                                                                        min_delta=0.0001)])
 
     def classifyData(self, inputData, batchSize):
@@ -57,7 +59,7 @@ class TextClassifier:
 
 class NLPClassifier:
     def __init__(self):
-        self.model = saving.load_model('output/my_model_regression.h5')
-
+        self.model = saving.load_model('output/my_model_regression_crossentropy_last.h5')
+# try my_model_regression_crossentropy.h5
     def classifyData(self, inputData):
         return self.model.predict(inputData, verbose=1)

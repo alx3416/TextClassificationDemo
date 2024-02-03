@@ -138,3 +138,23 @@ class MessageData(TextData):
     def paddingData(self):
         self.inputData = self.tokenizer.texts_to_sequences([self.getComment()])
         self.inputData = pad_sequences(self.inputData, maxlen=con.MAX_SEQUENCE_LENGTH)
+
+class jsonData(TextData):
+    def __init__(self):
+        self.tokenizer = None
+        self.inputData = None
+        self.rawComment = None
+
+    def setComment(self, comment):
+        self.rawComment = comment
+
+    def tokenizeData(self):
+        self.tokenizer = Tokenizer(num_words=con.MAX_NB_WORDS, filters='!"#$%&()*+,-./:;<=>?@[\]^_`{|}~', lower=True)
+        trainData = pd.read_csv('data/train.csv')
+        listColumnNames = list(trainData.columns)
+        consumerMessageColumnName = listColumnNames[con.CONSUMER_MESSAGE_INDEX_TRAIN]
+        self.tokenizer.fit_on_texts(trainData[consumerMessageColumnName].values)
+
+    def paddingData(self):
+        self.inputData = self.tokenizer.texts_to_sequences([self.rawComment])
+        self.inputData = pad_sequences(self.inputData, maxlen=con.MAX_SEQUENCE_LENGTH)
